@@ -3,12 +3,11 @@ var clickedElements = [];
 var appliedStyles = [];
 
 var finish = function () {
-  var identifyElement = function (el) {
+  var getAncestors = function (el) {
     var $el = $(el),
       parents = $el.parentsUntil('body'),
       elementNames = [];
 
-    // walk up to document
     parents.each(function (i, el) {
       var elementName = '';
 
@@ -28,14 +27,39 @@ var finish = function () {
     });
 
     elementNames.push('body');
-    return elementNames.reverse().join(' | ');
+    return elementNames.reverse();
+  };
+
+  var getStyleString = function (obj) {
+    var pairs = [];
+
+    Object.keys(obj).forEach(function (prop) {
+      pairs.push(prop + ': "' + obj[prop] + '"');
+    });
+
+    return pairs.join(', ');
   };
 
   appliedStyles.forEach(function (style, i) {
     var element = clickedElements[i],
-      elementId = identifyElement(element);
+      chain = getAncestors(element),
+      output = '';
 
-    console.log(elementId, style);
+    chain.forEach(function (element, i) {
+      if (i < chain.length - 1) {
+        output += element + ' { ';
+      }
+    });
+
+    output += getStyleString(style);
+
+    chain.reverse().forEach(function (element, i) {
+      if (i > 0) {
+        output += ' } ';
+      }
+    });
+
+    console.log(output);
   });
 };
 
